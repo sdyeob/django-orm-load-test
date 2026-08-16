@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로봇 현황 대시보드</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #f2f4f6; /* 토스 특유의 연한 회색 배경 */
+      color: #191f28;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    /* 헤더 영역 */
+    .header {
+      margin-bottom: 20px;
+      padding: 0 4px;
+    }
+
+    .header-sub {
+      font-size: 14px;
+      font-weight: 600;
+      color: #3182f6; /* 토스 블루 */
+      margin-bottom: 4px;
+    }
+
+    .header-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #191f28;
+    }
+
+    /* 토스 스타일 상단 요약 카드 */
+    .summary-card {
+      background-color: #ffffff;
+      border-radius: 20px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .summary-label {
+      font-size: 13px;
+      color: #8b95a1;
+      font-weight: 500;
+    }
+
+    .summary-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #191f28;
+    }
+
+    .summary-value.highlight {
+      color: #3182f6;
+    }
+
+    /* 카드 리스트 */
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .robot-card {
+      background-color: #ffffff;
+      border-radius: 18px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .robot-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* 상단: 로봇 ID & 등록일 */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .robot-id {
+      font-size: 18px;
+      font-weight: 700;
+      color: #191f28;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .joined-at {
+      font-size: 13px;
+      color: #8b95a1;
+      font-weight: 500;
+    }
+
+    /* 정보 그리드 */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .info-box {
+      background-color: #f9fafb;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #6b7684;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #333d4b;
+    }
+
+    /* 배터리 게이지 바 */
+    .battery-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .battery-bar-bg {
+      width: 100%;
+      height: 6px;
+      background-color: #e5e8eb;
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .battery-bar-fill {
+      height: 100%;
+      background-color: #3182f6; /* 토스 블루 */
+      border-radius: 3px;
+    }
+
+    /* 배터리 경고 색상 (20% 이하) */
+    .battery-low {
+      color: #f04452 !important; /* 토스 레드 */
+      background-color: #f04452 !important;
+    }
+
+    /* 데이터 없을 때 */
+    .empty-state {
+      background-color: #ffffff;
+      border-radius: 20px;
+      padding: 60px 20px;
+      text-align: center;
+      color: #8b95a1;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-sub">실시간 모니터링</div>
+      <h1 class="header-title">연결된 로봇 현황</h1>
+    </div>
+
+    <!-- 상단 요약 패널 (robot_infos 전체 개수 표시) -->
+    <div class="summary-card">
+      <div class="summary-item">
+        <span class="summary-label">조회된 로봇</span>
+        <!-- robot_infos|length 구문으로 전체 개수를 자동 계산 -->
+        <span class="summary-value highlight">{{ robot_infos|length }}대</span>
+      </div>
+      <div class="summary-item" style="text-align: right;">
+        <span class="summary-label">시스템 상태</span>
+        <span class="summary-value" style="color: #20c997; font-size: 16px;">● 정상 작동 중</span>
+      </div>
+    </div>
+
+    <div class="card-list">
+      <!-- 필수 변수인 robot_infos를 순회합니다 -->
+      {% for robot in robot_infos %}
+        <div class="robot-card">
+          <div class="card-header">
+            <div class="robot-id">🤖 {{ robot.robot_id }}</div>
+            <div class="joined-at">등록일 {{ robot.joined_at|date:"Y.m.d" }}</div>
+          </div>
+
+          <div class="info-grid">
+            <!-- 좌표 정보 -->
+            <div class="info-box">
+              <div class="info-label">현재 위치</div>
+              <div class="info-value">({{ robot.pos_x }}, {{ robot.pos_y }})</div>
+            </div>
+
+            <!-- 배터리 정보 -->
+            <div class="info-box">
+              <div class="info-label">배터리 잔량</div>
+              <div class="battery-container">
+                <span class="info-value {% if robot.battery <= 20 %}battery-low{% endif %}">
+                  {{ robot.battery }}%
+                </span>
+              </div>
+              <div class="battery-bar-bg">
+                <div class="battery-bar-fill {% if robot.battery <= 20 %}battery-low{% endif %}" 
+                     style="width: {{ robot.battery }}%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="empty-state">
+          등록된 로봇 정보가 없습니다.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</body>
+</html>
