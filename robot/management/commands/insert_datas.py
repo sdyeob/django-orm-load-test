@@ -48,10 +48,19 @@ class Command(BaseCommand):
 		start = time.perf_counter() # 시간 측정 시작
 
 		# 소요시간 42.86초, 42.65초, 44.76초 => 평균 : 43.42초
-		loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 1)
+		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 1)
 
 		# 소요 시간 : 1.84초, 1.95초, 1.83초 => 평균 : 1.87초
 		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 100)
+
+		# 소요 시간 : 1.67초, 1.74초, 1.69초 => 평균 : 1.70초
+		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 240)
+
+		# 소요 시간 : 1.64초, 1.66초, 1.62초 => 평균 : 1.64초
+		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 249)
+
+		# 소요 시간 : 1.60초, 1.59초, 1.61초 => 평균 : 1.60초
+		loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 270)
 
 		# 소요 시간 : 1.91초, 1.92초, 1.91초 => 평균 : 1.91초
 		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 1_000)
