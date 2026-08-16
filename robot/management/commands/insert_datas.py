@@ -22,16 +22,17 @@ def create_objects(bulk_size) :
 		for data in robot_datas
 	]
 
-
+	return robot_objects
 
 def test_by_batch_size(robot_objects, bulk_size, batch_size) :
+	Robot.objects.all().delete() # Robot 테이블에 존재하는 모든 Record 삭제
+
 	loaded_cnt = 0
 	for i in range(0, bulk_size, batch_size) :
 		loaded_cnt += len(Robot.objects.bulk_create(robot_objects[i:i+batch_size]))
 
 	return loaded_cnt
 
-	
 
 class Command(BaseCommand):
 	help = '로봇 데이터 적재를 시작합니다.'
