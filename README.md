@@ -61,3 +61,5 @@
 ### Future Work
 1. Default DB를 sqlite3가 아닌 다른 database(mysql, mongodb)로 변경했을 때의 속도 차이 테스트
 
+### PPT Link
+Link : https://www.miricanvas.com/v2/ko/design2/v/0592386c-a134-40b5-9568-8e71147cb7c8
