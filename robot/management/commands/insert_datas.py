@@ -24,7 +24,7 @@ def create_objects(bulk_size) :
 
 	return robot_objects
 
-def test_by_batch_size(robot_objects, bulk_size, batch_size) :
+def test_by_batch_size(robot_objects:list[Robot], bulk_size: int, batch_size: int)->int :
 	Robot.objects.all().delete() # Robot 테이블에 존재하는 모든 Record 삭제
 
 	loaded_cnt = 0
@@ -32,6 +32,20 @@ def test_by_batch_size(robot_objects, bulk_size, batch_size) :
 		loaded_cnt += len(Robot.objects.bulk_create(robot_objects[i:i+batch_size]))
 
 	return loaded_cnt
+
+def time_check(robot_objects:list[Robot], bulk_size: int, batch_size: int):
+	avg_time = 0
+	iter_cnt = 3
+	for _ in range(iter_cnt) :
+		start = time.perf_counter() # 시간 측정 시작
+
+		# 소요 시간 : 1.64초, 1.66초, 1.62초 => 평균 : 1.64초
+		loaded_cnt = test_by_batch_size(robot_objects, bulk_size, batch_size)
+
+		end = time.perf_counter() # 시간 측정 끝
+		avg_time += end - start
+
+	return (loaded_cnt, (avg_time / iter_cnt))
 
 
 class Command(BaseCommand):
@@ -45,37 +59,11 @@ class Command(BaseCommand):
 		bulk_size = 100_000
 
 		robot_objects = create_objects(bulk_size=bulk_size)
-		start = time.perf_counter() # 시간 측정 시작
-
-		# 소요시간 42.86초, 42.65초, 44.76초 => 평균 : 43.42초
-		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 1)
-
-		# 소요 시간 : 1.84초, 1.95초, 1.83초 => 평균 : 1.87초
-		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 100)
-
-		# 소요 시간 : 1.67초, 1.74초, 1.69초 => 평균 : 1.70초
-		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 240)
-
-		# 소요 시간 : 1.64초, 1.66초, 1.62초 => 평균 : 1.64초
-		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 249)
-
-		# 소요 시간 : 1.60초, 1.59초, 1.61초 => 평균 : 1.60초
-		loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 270)
-
-		# 소요 시간 : 1.91초, 1.92초, 1.91초 => 평균 : 1.91초
-		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 1_000)
-
-		# 소요 시간 : 2.03초, 2.11초, 2.03초 => 평균 : 2.05초
-		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 10_000)
-
-		# 소요 시간 2.35초, 2.33초, 2.45초 => 평균 : 2.37초
-		#loaded_cnt = test_by_batch_size(robot_objects, bulk_size, 100_000) 
-
-		end = time.perf_counter() # 시간 측정 끝
+		loaded_cnt, avg_time = time_check(robot_objects, bulk_size, 100000)
 
 		self.stdout.write(
 			self.style.SUCCESS(f'성공적으로 {loaded_cnt}명의 로봇 데이터를 적재했습니다.')
 		)
 		self.stdout.write(
-			self.style.SUCCESS(f"소요시간: {end - start:.2f}초")
+			self.style.SUCCESS(f"소요시간: {avg_time:.2f}초")
 		)
