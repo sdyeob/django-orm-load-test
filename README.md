@@ -1,7 +1,7 @@
 # django batch size에 따른 db 적재 속도 테스트
 
 ### 테스트 설명
-* django의 ORM을 이용하여 database에 데이터를 적재할 때, bulk size(n)에 따른 속도 차이 검증
+* django의 ORM을 이용하여 database에 데이터를 적재할 때, batch size(n)에 따른 속도 차이 검증
 * Default Database : sqlite3
 * single datasize : 184B
 * bulk datasize : 약 17MB
@@ -47,7 +47,7 @@
 ### 성능 차이 이유
 1. n = 1일 때 시간이 오래 걸리는 이유
 	- 일반적으로 db는 `auto-commit` 옵션이 활성화 되어있다. 따라서, 1개의 데이터를 처리할 때 마다 `auto-commit`을 수행하고, 이로 인해 Disk I/O 오버헤드가 발생한다.
-		- auto-commit이란 하나의 작업을 BEGIN -> parsing/compile -> EXECUTION -> Commit -> DISK I/O의 실행 흐름을 의미한다.
+		- auto-commit모드에서는 BEGIN -> parsing/compile -> EXECUTION -> Commit -> DISK I/O의 흐름이 실행된다.
 	- 이 때, 계속해서 parsing / compile을 하는 작업조차 큰 오버헤드가 될 수 있다.
 2. n = 100,000일 때 가장 빠르지 않은 이유
 	1. python이 사용하는 메모리 용량의 급증
@@ -61,6 +61,6 @@
 3. n = 250이 가장 빠른 이유
 	- n = 100,000일 때 가장 빠르지 않은 이유에서 2번째 binding parameter의 수 제한을 확인한 뒤에, 이론적으로는 n=250에 가장 가까울 때 최고 속도를 낼 것 같아서 이 근처값으로 실험을 해봤는데 실제로 n=250근처일 때 가장 빨랐다.
 
-### Feature Work
+### Future Work
 1. Default DB를 sqlite3가 아닌 다른 database(mysql, mongodb)로 변경했을 때의 속도 차이 테스트
 
